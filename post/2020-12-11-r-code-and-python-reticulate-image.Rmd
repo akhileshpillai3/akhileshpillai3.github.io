@@ -1,0 +1,13 @@
+---
+title: R Code and Python Reticulate Image
+author: 'Akhilesh Pillai'
+date: '2020-12-11'
+slug: r-code-and-python-reticulate-image
+categories: []
+tags: []
+description: ''
+---
+
+Here is an image that I found that represents the interplay between R code and Python. 
+
+![](/post/2020-12-11-r-code-and-python-reticulate-image_files/pythonr.png)
