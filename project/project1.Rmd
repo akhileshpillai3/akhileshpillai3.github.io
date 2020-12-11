@@ -1,0 +1,243 @@
+---
+title: 'Project 1: Exploratory Data Analysis'
+author: "Akhilesh Pillai (ap47828)"
+date: ''
+output:
+  html_document:
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+  pdf_document:
+    toc: no
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, fig.align = "center", warning = F, message = F,
+tidy=TRUE, tidy.opts=list(width.cutoff=60), R.options=list(max.print=100))
+```
+
+###Data Wrangling and Data Exploration
+
+```{R}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(tibble)
+library(readr)
+
+### Importing data sets 
+child_mortality_0_5_year_olds_dying_per_1000_born <-read_csv("child_mortality_0_5_year_olds_dying_per_1000_born.csv")
+
+income_per_person_gdppercapita_ppp_inflation_adjusted<-read_csv("income_per_person_gdppercapita_ppp_inflation_adjusted.csv")
+
+primary_completion_rate_total_percent_of_relevant_age_group <-read_csv("primary_completion_rate_total_percent_of_relevant_age_group.csv")
+```
+
+
+###Introduction 
+
+The datasets that I picked for this project is child mortality for children ages 0-5 per 1000 births, the income per person (GDP capita inflation adjsuted), and the primary completion rate for the total percent of the relevant age group. These datasets have fairly similar variables. The child mortality dataset has the following variables: year, country, child mortality rate for ages 0-5 (per 1000 births). The income dataset has the following variables: country, year, and income. The primary completion dataset has the following variables: country, year, and % of primary school education completed. I acquired these datasets through a website called gapminder.com, under the data subsection of the site. This data was interesting to me because I wanted to see if income of a country would have any correlation to the child mortality rate and the percent of students who complete their primary school education. These are profound variables that are very commonly studied, and it interested me to identify if these variables relate to each other. I expect that as the income of the country decreases, the child mortality rate should go up and the percent of children who finish their primary school education should should go down. A similarly correlating trend should persist when looking at the increase in the income of a country.
+
+
+###Tidying Data Sets
+
+```{R}
+tidy_childmortality <- child_mortality_0_5_year_olds_dying_per_1000_born %>% pivot_longer(c("2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018"),names_to = "year",values_to= "cases")
+
+tidy_primary<-primary_completion_rate_total_percent_of_relevant_age_group %>% pivot_longer(c("2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018"),names_to = "year",values_to= "primary education")
+
+tidy_income<-income_per_person_gdppercapita_ppp_inflation_adjusted %>% pivot_longer(c("2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018"),names_to = "year",values_to= "income")
+
+tidy_childmortality %>% na.omit()
+
+tidy_income %>% na.omit()
+
+tidy_primary %>% na.omit()
+```
+
+All of the datasets had to undergo a tidy, since they were not so to begin with. In the datasets that I initially had, the column headers were dates. The tidy function was run on these and a new column for each value was created. "tidy_childmortality" created a column for "cases" and a column for "year". In the "tidy_income" dataset, a new column was made for "year" and "income". And finally in the "tidy_primary" data set, a new column was made for the "year" and "primary education". This was done using the pivot_longer function, which created a new column in each of the datasets, one for the year and the other for the respective value. There were some N/A values and those had to be omitted with the na.omit function. 
+
+###Joining/Merging Data Sets 
+
+```{R}
+Merged_Data <- tidy_childmortality %>% left_join(tidy_income) %>% left_join(tidy_primary)
+```
+In order to merge the datasets, the left_join function was used. This function was used because it merges all of the data sets based on what columns match in each dataset. To begin with, the tidy_childmortality data set had 3,705 observations with 3 variables. The tidy_income data set had 3,667 observations with 3 variables. The tidy_primary dataset had 3,515 observations with 3 variables. There are two variables in each dataset that were the same, the year and the country. 
+
+###Wrangling
+
+**Summary Statistics with Core Dplyr Functions**
+
+```{R}
+###Correlation Matrix
+cormat<-Merged_Data %>% na.omit() %>% select_if(is.numeric) %>% cor()
+cormat
+```
+The select function was used to create the correlation matrix of all of the numeric values in the merged data. According to this matrix, there is a relatively strong negative correlation between primary education completion rates and child mortality rates. This means that as the the rate of primary education completion goes up, the child mortality rate for children ages 0-5 goes down. When it comes to child mortality rate and income, there is a negative correlation. Even though it is not as strong, this means that as the child mortality rate increases, the income decreases. Finally, there is a weak positive correlation between primary education completion rate and income. As the primary education completion rate goes up, the income also increases, even though it is a weak correlation.
+
+```{R}
+###Average Income Based on Country
+Merged_Data %>% group_by(country) %>% summarize(mean(income, na.rm = T))
+```
+Using the group_by function, I was able to isolate and calculate the average income for each country. The values are given in the table. Based on this, the country with the highest mean income is Qatar (114,736.8421) and the country with the lowest mean income is Somalia (615.8947). 
+
+```{R}
+###Filter for Year and Sorting by Child Mortality
+Merged_Data %>% filter(year=="2018") %>% arrange(desc(cases, na.rm=T))
+```
+Using the filter and arrange functions, I was able to isolate the data from all the countries into a single year to focus on. I picked 2018, since that was the latest year in all of the datasets. Once I filtered the data to only show data from 2018, I used the arrange function to arrange the data based on cases of child mortality. From this, I can tell that Somalia has the highest child mortality rates, compared to all of the other countries in this dataset. 
+
+```{R}
+###Using mutate function
+Merged_Data %>% mutate(cases_by_100= cases/10)
+```
+A new variable was created using the mutate function. This new variable, "cases_by_100"", represents the child mortality rate per every 100 births. The old "cases variable was the child mortality rate per every 1000 births. The mutate function allows us to create a new variable by manipulating another variable in the data set. This is usually helpful to make large numbers smaller on a scale so that analysis is easier. 
+
+
+**Summary Statistics With Summary and Group_by**
+
+```{R}
+###Mean of each Variable given the Country
+Merged_Data %>% group_by(country) %>% summarize_if(is.numeric, mean, na.rm=T) %>% head()
+```
+This above shows the mean of each variable and is separated by different countries. This was grouped by country, using the group_by function and then the summarize function was used to calculate the mean of each numeric variable in the dataset. 
+
+```{R}
+###Standard Deviation of each Variable given the Country
+Merged_Data %>% group_by(country) %>% summarize_if(is.numeric, sd, na.rm=T) %>% head()
+```
+This above shows the standard deviation of each variable and is separated by different countries. This was grouped by country, using the group_by function and then the summarize function was used to calculate the standard deviation of each numeric variable in the dataset. 
+
+```{R}
+###Variation of each Variable given the Country
+Merged_Data %>% group_by(country) %>% summarize_if(is.numeric, var, na.rm=T) %>% head()
+```
+This above shows the variation of each variable and is separated by different countries. This was grouped by country, using the group_by function and then the summarize function was used to calculate the variation of each numeric variable in the dataset. The higher the variation number means that there is more variation within that variable in the data set. 
+
+```{R}
+###Minimum of each Variable given the Country
+Merged_Data %>% group_by(country) %>% summarize_if(is.numeric, min, na.rm=T) %>% head()
+```
+This above shows the minimum of each variable and is separated by different countries. This was grouped by country, using the group_by function and then the summarize function was used to calculate the minimum of each numeric variable in the dataset. 
+
+```{R}
+###Maximum of each Variable given the Country
+Merged_Data %>% group_by(country) %>% summarize_if(is.numeric, max, na.rm=T) %>% head()
+```
+This above shows the maximum of each variable and is separated by different countries. This was grouped by country, using the group_by function and then the summarize function was used to calculate the maximum of each numeric variable in the dataset. 
+
+```{R}
+###Mean of each Variable given the Year
+Merged_Data %>% group_by(year) %>% summarize_if(is.numeric, mean, na.rm=T) %>% head()
+```
+This above shows the mean of each variable and is separated by different years. This was grouped by year, using the group_by function and then the summarize function was used to calculate the mean of each numeric variable in the dataset. Since this grouped by year, this data include the numeric values for all of the countries in a given year.  
+
+```{R}
+###Standard Deviation of each Variable given the Year
+Merged_Data %>% group_by(year) %>% summarize_if(is.numeric, sd, na.rm=T) %>% head()
+```
+This above shows the standard deviation of each variable and is separated by different years. This was grouped by year, using the group_by function and then the summarize function was used to calculate the standard deviation of each numeric variable in the dataset. Since this grouped by year, this data include the numeric values for all of the countries in a given year.  
+
+```{R}
+###Variation of each Variable given the Year
+Merged_Data %>% group_by(year) %>% summarize_if(is.numeric, var, na.rm=T) %>% head()
+```
+This above shows the variation of each variable and is separated by different years. This was grouped by year, using the group_by function and then the summarize function was used to calculate the variation of each numeric variable in the dataset. Since this grouped by year, this data include the numeric values for all of the countries in a given year.  
+
+```{R}
+###Minimum of each Variable given the Year
+Merged_Data %>% group_by(year) %>% summarize_if(is.numeric, min, na.rm=T) %>% head()
+```
+This above shows the minimum value of each variable and is separated by different years. This was grouped by year, using the group_by function and then the summarize function was used to calculate the minimum of each numeric variable in the dataset. Since this grouped by year, this data include the numeric values for all of the countries in a given year.  
+
+```{R}
+###Maximum of each Variable given the Year
+Merged_Data %>% group_by(year) %>% summarize_if(is.numeric, max, na.rm=T) %>% head()
+```
+This above shows the maximum value of each variable and is separated by different years. This was grouped by year, using the group_by function and then the summarize function was used to calculate the maximum of each numeric variable in the dataset. Since this grouped by year, this data include the numeric values for all of the countries in a given year. 
+
+
+###Visualizations
+
+**Correlation Heat Map Of Numeric Variables**
+
+```{R}
+col <- colorRampPalette(c("blue","white", "red")) (20)
+heatmap(cormat, col=col, symm = TRUE) 
+```
+The graph above shows a heat map for the correlation of the numeric variables in the joined dataset. This graph is basically a visual representation of the correlation matrix. The red boxes mean that there is a positive correlation whereas the blue boxes indicate a negative correlation. The darker the box, the higher the correlation and the lighter the box, the lower the correlation. 
+
+
+**Child Mortality vs. % Primary Education Completed with Income Data**
+
+```{R}
+ggplot(Merged_Data, aes(Merged_Data$cases,Merged_Data$`primary education`, color=log10(income)),stat="summary") +geom_point(size=0.5) +scale_y_continuous("% Primary Education Completion") +scale_color_gradient(low = "blue", high = "red") +labs(color= "Log Income") + ggtitle("Child Mortality and % of Primary Education Completed with Income for Countries Around the World") +scale_x_continuous("Child Mortality")
+```
+The ggplot above shows plots child mortality with the % of primary education completion with the log of income as the data points for all of the countries in our dataset. According to this graph, as the child mortality increases the % of primary education completed decreases. This is the expected negative correlation from this data. The income was logged since it helps strengthen the correlation. Countries with higher child mortality rates and lower % of primary education completion rates were found to have lower income, vice versa. 
+
+**Child Mortality vs. % Primary Education Completed with Income Data**
+
+```{R}
+ggplot(data = Merged_Data, aes(x=Merged_Data$income, y=Merged_Data$cases)) +geom_point(aes(color=Merged_Data$`primary education`)) +stat_smooth(method = "gam", formula = y ~ s(x), size=0.5, color="cyan") +xlab("Income") +scale_y_continuous(name = "Child Mortality", breaks = c(10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200)) +ggtitle("Income vs. Child Mortality with % Primary Education Completion for Countries from 2000-2018") + labs(color= "% Primary Education Completion")
+```
+This graph above shows the relationship between income and child mortality with the points being % of primary education completion. There seems to be a negative correlation with income and child mortality. The higher the income, the lower the child mortality rate. When it comes to the % of primary education completed, there is a higher percent in countries that have a higher income level. There is a gradient of decrease in the % of primary education completion as the income decreases. There is also a gradient decrease in the % of primary education completion as the child mortality rate increases which seems to show that as the child mortality rate increases the % of primary education completion decreases. The line seen in this graph follows the points and trends that is seen in the graph. 
+
+###Dimensionality Reduction
+
+**Data Preparation**
+```{R}
+###Normalizing The Data
+data_norm <- Merged_Data %>% select_if(is.numeric) %>% na.omit %>% scale
+```
+The first step of conducted a Principle Component Analysis (PCA) is to prepare the data. The first preparation step is to normalize the data. All of the numeric values were taken, the N/A's were ommitted, and the scale was set to mean=0 and sd=1. 
+
+```{R}
+###Running Princomp
+data_pca <-princomp(data_norm)
+```
+
+```{R}
+###Results Summary 
+summary(data_pca, loadings = T)
+```
+
+The summary conducted above provides an overview the princomp that was run on the data. However, in order to determine which variables I want to keep for the PCA analysis, I just have to look at the first part of the summary. 
+
+**What PC to Keep**
+```{R}
+###Calculating Eigenvalues
+eigenval <- data_pca$sdev^2
+
+###Variation Explained by Eigenvalues
+varprop=round(eigenval/sum(eigenval),2)
+
+###Plot for Proportion of Variation 
+ggplot()+geom_bar(aes(y=varprop,x=1:3),stat="identity")+
+xlab("")+geom_path(aes(y=varprop,x=1:3))+
+geom_text(aes(x=1:3,y=varprop,label=round(varprop,2)),vjust=1,col="white",size=5)+
+scale_y_continuous(breaks=seq(0,.6,.2),labels = scales::percent)+
+scale_x_continuous(breaks=1:3)
+```
+
+Based on the scree plot created above, it seems like all of the variables (PC's) should be kept because the curve does not seem to flatten at any point during the graph. 
+
+```{R}
+###Finding Cumalative Proportion of Variance 
+round(cumsum(eigenval)/sum(eigenval),2)
+```
+According to the calculations of cumalative proportion of variance, the PC that I should pick is Comp 1 since those proportions add up to 80%.
+
+```{R}
+eigenval
+```
+According to Kaiser's rule, I would pick Comp 1 because the PC value for Comp 1 is the only one that is greater than 1. 
+
+**Plotting PCA**
+
+```{R}
+###Plotting the PC's
+dataframe<-data.frame(PC1=data_pca$scores[,1], PC2=data_pca$scores[,2])
+ggplot(dataframe, aes(PC1, PC2)) +geom_point()
+```
+Even though I determined that PC1 was the only adequate PC component to use, I had to use PC2 as well for the graph so that it can be compared to something. According to the graph it is safe to tell that the points along the PC1 axis are not as evenly spread out, which means that they do not influence PC1. When it comes to PC2, the points still do not seem as spread out, but they are more spread out than PC1. This means that even though they have no influence in neither of the PC's, it has slightly more influence on PC2 than it does on PC1. 

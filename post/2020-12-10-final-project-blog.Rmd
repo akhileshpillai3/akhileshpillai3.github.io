@@ -1,0 +1,49 @@
+---
+title: Final Project Blog
+author: 'Akhilesh Pillai'
+date: '2020-12-10'
+slug: final-project-blog
+categories: []
+tags: []
+description: ''
+---
+##Language Is Complicated 
+
+Having grown up in 4 different countries,  I have been exposed to many different languages. It can often become confusing keeping up with the different languages everywhere I go. It got me thinking, what if there was a way to combine all languages so that everyone could easily understand what everyone else is saying. I had this tought ponder in my head growing up and observing these different cultures. Then I started taking classes like biostatistics and computational biology and saw how coding laguage is very similar to actual language. I saw how closely correlated and related both types of code (R Code and Python) are. This concept is called Reticulate. 
+
+##What is Reticulate? 
+
+The literal defintion of reticulate is "constructed, arranged, or marked like a net or network." When this definition gets translated into the coding world, it refers to the interplay between R code and Python in R studio. When it comes to R studio, there is a specific reticulate package that can be downloaded and used to make sure that R code and Python work together. Shown below is the code line for both R and Python, which demonstrates how the reticulate package works and how these two languages interact with each other: 
+
+```{r}
+library(reticulate)
+a <- "R Code and Python"
+```
+
+The above is coded in R code and the code below is python:
+
+```{python}
+b= "are both complicated."
+print(r.a, b)
+```
+The result of this code, seen above, is the reticulated version of both R Code and Python together. 
+
+##Python Code Example
+
+Seen below is an example of python code that was used for one of the homeworks assignments this semester. 
+
+```{python}
+import pandas as pd
+quakes=pd.read_csv("https://vincentarelbundock.github.io/Rdatasets/csv/datasets/quakes.csv",index_col=0)
+
+type(quakes)
+len(quakes)
+len(quakes.columns)
+
+import numpy as np
+
+quakes["mag"].describe()
+quakes["depth"].describe()
+```
+
+As you can see from this code, finding the summary statitics on python is very similar to finding the summary statistics on R code. The results of the python code and the results of the R code are the same as they both tell us how many rows are in the dataset (1000) and how many columns/variables in the dataset (5). They also tell us that for magnitude, the minimum and maximum is 4 and 6.4, respectively. The mean and median for the magnitude are 4.6204 and 4.6, respectively. For depth, the minimum and maximum are 40 and 680, respectively. The mean and the median for the depth variable is 311.371 and 247, respectively. Both of these languages effectively communicate with each other which makes the interplay between them much easier. With that being said, even though it was quite difficult at times to deal with the new aspects of R code and Python that I have never been exposed to before, it has been a tremendouse pleasure working with them over the course of the semester. 

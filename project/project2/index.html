@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Akhilesh Pillai" />
+    
+    <link rel="shortcut icon" type="image/x-icon" href="../../img/favicon.ico">
+    <title>Project 2: Modeling, Testing, and Predicting</title>
+    <meta name="generator" content="Hugo 0.79.0" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="../../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
+    
+    <!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+    
+  </head>
+
+  <body>
+    <div id="wrap">
+      
+      <nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="../../"><i class="fa fa-home"></i></a>
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div class="navbar-collapse collapse" id="navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+        <li><a href="../../post/">BLOG</a></li>
+        
+        <li><a href="../../projects/">PROJECTS</a></li>
+        
+        <li><a href="../../resume/">RESUME</a></li>
+        
+      
+      </ul>
+    </div>
+  </div>
+</nav>
+
+      <div class="container">
+        <div class="blog-post">
+          <h3>
+            <strong><a href="../../project/project2/">Project 2: Modeling, Testing, and Predicting</a></strong>
+          </h3>
+        </div>
+ 
+<div class="blog-title">
+          <h4>
+         January 1, 0001 
+            &nbsp;&nbsp;
+            
+          </h4>
+        </div>
+
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="blogpost">
+              
+
+
+<div id="introduction-of-dataset" class="section level2">
+<h2>Introduction of Dataset</h2>
+<p>This dataset includes the results of a cross-sectional study, from High School and Beyond, which was conducted in 1980 and then once again followed up in 1986. This dataset includes survey results from students from approximately 1,100 high schools. This dataset consists of several variables, both categorical and numerical. The categorical variables include gender, ethnicity, fcollege, mcollege, home, urban, income and region. The numerical variables in this dataset include score, umep, wage, distance, tuition, and education. When it comes to what each of these variables represent gender jsut indicates the gender. Ethnicity indicaates the ethnicity of the individual (either African American, Hispanic or other). Score indicates the base year composite score on the achievement tests givne to high school seniors in this sample. Fcollege indicates whether or not the father is a college graduate. Mcollege indicates whether or not the mother is a college graduate. Home indicates if the family owns their own home. Urban indicates is the school is in an urban area. Unemp indicates the county unemployment rate in 1980. Wage indicates the state hourly wage in manufacturing in 1980. Distance indicates the distance from 4 year colleges (in 10 miles). Tuition indicates the average state 4-year tuition (in 1000 USD). Education indicates the number of years of education. Income indicates whether or not the family's income is above $25,000. Finally, region indicates the region (West or other). I chose this dataset becuase I thought it would be interesting to look at all of the factors that affect the scores on achievement exams for this particular group of high school seniors.</p>
+</div>
+<div id="guidelines-and-rubric" class="section level2">
+<h2>Guidelines and Rubric</h2>
+<ul>
+<li><strong>1. (15 pts)</strong> Perform a MANOVA testing whether any of your numeric variables (or a subset of them, if including them all is unreasonable or doesn't make sense) show a mean difference across levels of one of your categorical variables (3). If they do, perform univariate ANOVAs to find response(s) showing a mean difference across groups (3), and perform post-hoc t tests to find which groups differ (3). Discuss the number of tests you have performed, calculate the probability of at least one type I error (if unadjusted), and adjust the significance level accordingly (bonferroni correction) before discussing significant differences (3). Briefly discuss MANOVA assumptions and whether or not they are likely to have been met (no need for anything too in-depth) (2).</li>
+</ul>
+<pre class="r"><code>library(lmtest)
+library(sandwich)
+library(plotROC)
+library(tidyverse)
+library(MASS)
+library(glmnet)
+library(ggplot2)
+
+#Importing Dataset 
+CollegeDistance &lt;- read_csv(&quot;CollegeDistance.csv&quot;)
+
+#MANOVA 
+manova &lt;- manova(cbind(education, score, wage)~gender, data=CollegeDistance)
+summary(manova)</code></pre>
+<pre><code>## Df Pillai approx F num Df den Df Pr(&gt;F)
+## gender 1 0.0076805 12.216 3 4735 5.837e-08 ***
+## Residuals 4737
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1</code></pre>
+<p>A manova test was conducted to determine the effect of gender on the number of years of education, base year composite test scores, and the state hourly wage in manufacturing 1980. The results of the manova test indicate that significant differences were found among each of variables at each site.</p>
+<pre class="r"><code>#Univariate ANOVA
+summary.aov(manova)</code></pre>
+<pre><code>## Response education :
+## Df Sum Sq Mean Sq F value Pr(&gt;F)
+## gender 1 1.4 1.4457 0.4516 0.5016
+## Residuals 4737 15164.4 3.2013
+##
+## Response score :
+## Df Sum Sq Mean Sq F value Pr(&gt;F)
+## gender 1 2306 2305.89 30.642 3.27e-08 ***
+## Residuals 4737 356471 75.25
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1
+##
+## Response wage :
+## Df Sum Sq Mean Sq F value Pr(&gt;F)
+## gender 1 6.3 6.3282 3.5101 0.06106 .
+## Residuals 4737 8540.2 1.8029
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1</code></pre>
+<p>The ANOVA test for each dependent variable was conducted as a follow-up to the MANOVA test that was previously conducted. The univariate ANOVA for score was significantly different by gender. But the ones for wage and education were not significantly different by gender.</p>
+<pre class="r"><code>#Post-Hoc T-Test
+pairwise.t.test(CollegeDistance$education, CollegeDistance$gender, p.adj=&quot;none&quot;)</code></pre>
+<pre><code>##
+## Pairwise comparisons using t tests with pooled SD
+##
+## data: CollegeDistance$education and
+CollegeDistance$gender
+##
+## female
+## male 0.5
+##
+## P value adjustment method: none</code></pre>
+<pre class="r"><code>pairwise.t.test(CollegeDistance$score, CollegeDistance$gender, p.adj=&quot;none&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  CollegeDistance$score and CollegeDistance$gender 
+## 
+##      female 
+## male 3.3e-08
+## 
+## P value adjustment method: none</code></pre>
+<pre class="r"><code>pairwise.t.test(CollegeDistance$wage, CollegeDistance$gender, p.adj= &quot;none&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  CollegeDistance$wage and CollegeDistance$gender 
+## 
+##      female
+## male 0.061 
+## 
+## P value adjustment method: none</code></pre>
+<p>A post-hoc analysis was carried out by conducting pairwise comparisons to determine which gender differed in each variable that was tested. In this case, all of the p-values were greater than 0.05, except for the comparison of gender and score. This means that males significantly differ from females in the score variable but they do not significantly differ from females in the education and wage variables.</p>
+<pre class="r"><code>#Probablilty of at Least One Type-1 Error 
+1-(1-0.05)^7</code></pre>
+<pre><code>## [1] 0.3016627</code></pre>
+<p>Since I ran 7 different hypotheses, the probability of a Type 1 error occuring was 0.3016627.</p>
+<pre class="r"><code>#Bonferroni Adjusted Correction 
+0.05/7</code></pre>
+<pre><code>## [1] 0.007142857</code></pre>
+<p>To Bonferroni Correction was used to keep the Type-1 error at 0.05. The adjusted signifiance level is approximately 0.007142857.</p>
+<pre class="r"><code>#Adjusted Post-Hoc T-tests with Bonferroni Correction
+pairwise.t.test(CollegeDistance$education, CollegeDistance$gender, p.adj=&quot;bonf&quot;)</code></pre>
+<pre><code>##
+## Pairwise comparisons using t tests with pooled SD
+##
+## data: CollegeDistance$education and
+CollegeDistance$gender
+##
+## female
+## male 0.5
+##
+## P value adjustment method: bonferroni</code></pre>
+<pre class="r"><code>pairwise.t.test(CollegeDistance$score, CollegeDistance$gender, p.adj=&quot;bonf&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  CollegeDistance$score and CollegeDistance$gender 
+## 
+##      female 
+## male 3.3e-08
+## 
+## P value adjustment method: bonferroni</code></pre>
+<pre class="r"><code>pairwise.t.test(CollegeDistance$wage, CollegeDistance$gender, p.adj=&quot;bonf&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  CollegeDistance$wage and CollegeDistance$gender 
+## 
+##      female
+## male 0.061 
+## 
+## P value adjustment method: bonferroni</code></pre>
+<p>After adjusting for the significance level using the bonferroni correction, the mean difference between males and females remain the same for each of the variables as before.</p>
+<p>This means that the assumptions for the ANOVA test (independent observations, random sample, equal variance, etc.) were all met and the assumptions for the MANOVA test were most likley not met. A primary reason for this is because the MANOVA has a lot more assumptions including homogeneity, no extreme outliers, multivariate normality, no multicollinearity, among others. This makes it nearly impossible to find a dataset that fits all of these assumptions.</p>
+<ul>
+<li><strong>2. (10 pts)</strong> Perform some kind of randomization test on your data (that makes sense). The statistic can be anything you want (mean difference, correlation, F-statistic/ANOVA, chi-squared), etc. State null and alternative hypotheses, perform the test, and interpret the results (7). Create a plot visualizing the null distribution and the test statistic (3).</li>
+</ul>
+<pre class="r"><code>#Null and ALternative Hypothesis </code></pre>
+<p>Null (Ho): The mean score is the same for male vs. female high school seniors in this sample. Alternative (Ha): The mean score is different for male and female high school seniors in this sample.</p>
+<pre class="r"><code>#Randomization Test (Mean Difference)
+#Test Statistic 
+mean_diff &lt;-mean(CollegeDistance[CollegeDistance$gender==&quot;Male&quot;,]$score)~mean(CollegeDistance[CollegeDistance$gender==&quot;Female&quot;,]$score)
+
+#Permutation Loop
+rand_dist&lt;-vector()
+for(i in 1:5000){
+new&lt;-data.frame(score=sample(CollegeDistance$score),gender=CollegeDistance$gender)
+rand_dist[i]&lt;-mean(new[new$gender==&quot;Male&quot;,]$score)-
+mean(new[new$gender==&quot;Female&quot;,]$score)}
+
+#Independent T-Test  
+t.test(data=CollegeDistance, score~gender)</code></pre>
+<pre><code>##
+## Welch Two Sample t-test
+##
+## data: score by gender
+## t = -5.5096, df = 4472.2, p-value = 3.798e-08
+## alternative hypothesis: true difference in means is not
+equal to 0
+## 95 percent confidence interval:
+## -1.9005360 -0.9029613
+## sample estimates:
+## mean in group female mean in group male
+## 50.25633 51.65808</code></pre>
+<p>The p-value for the t-test that was performed came out to be approximately 3.798e-08. Since this value is below alpha (0.05), we can reject the null hypothesis. This leads to the conclusoin that the mean score is significantly different for both male and female high school students in the sample that is represented in the dataset.</p>
+<pre class="r"><code>#Plot Visualization of Null Distribution and Test Statistic </code></pre>
+<ul>
+<li><p><strong>3. (35 pts)</strong> Build a linear regression model predicting one of your response variables from at least 2 other variables, including their interaction. Mean-center any numeric variables involved in the interaction.</p>
+<ul>
+<li>Interpret the coefficient estimates (do not discuss significance) (10)</li>
+<li>Plot the regression using <code>ggplot()</code> using geom_smooth(method=&quot;lm&quot;). If your interaction is numeric by numeric, refer to code in the slides to make the plot or check out the <code>interactions</code> package, which makes this easier. If you have 3 or more predictors, just chose two of them to plot for convenience. (8)</li>
+<li>Check assumptions of linearity, normality, and homoskedasticity either graphically or using a hypothesis test (4)</li>
+<li>Regardless, recompute regression results with robust standard errors via <code>coeftest(..., vcov=vcovHC(...))</code>. Discuss significance of results, including any changes from before/after robust SEs if applicable. (8)</li>
+<li>What proportion of the variation in the outcome does your model explain? (4)</li>
+</ul></li>
+</ul>
+<pre class="r"><code>#Mean-Centering Numeric Variable
+CollegeDistance_c &lt;- CollegeDistance
+CollegeDistance_c$education &lt;- CollegeDistance_c$education - mean(CollegeDistance_c$education, na.rm = T)
+
+#Linear Regression with Interaction 
+fit1 &lt;-lm(score ~ gender * education, data = CollegeDistance)
+summary(fit1)</code></pre>
+<pre><code>##
+## Call:
+## lm(formula = score ~ gender * education, data =
+CollegeDistance)
+##
+## Residuals:
+## Min 1Q Median 3Q Max
+## -23.461 -5.832 -0.035 5.599 26.266
+##
+## Coefficients:
+## Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept) 21.68668 1.17604 18.440 &lt; 2e-16 ***
+## gendermale -4.33496 1.74073 -2.490 0.01280 *
+## education 2.07148 0.08457 24.494 &lt; 2e-16 ***
+## gendermale:education 0.40963 0.12499 3.277 0.00106 **
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1
+##
+## Residual standard error: 7.669 on 4735 degrees of
+freedom
+## Multiple R-squared: 0.2239, Adjusted R-squared: 0.2234
+## F-statistic: 455.3 on 3 and 4735 DF, p-value: &lt; 2.2e-16</code></pre>
+<p>When there is no interaction between gender and education, the intercept estimate of 21.68668 is the average composite score. The coefficient estimate of -4.33496 is how much the average score decreases when the gender is male. The coefficient estimate of 2.07148 is how much the average score increases with the increase in every year of education. The coefficient of gendermale:education is how much average score will increases if the gender was male and the education increases (0.40963).</p>
+<pre class="r"><code>#Plotting Regression
+ggplot(CollegeDistance, aes(x=education, y=score, group=gender))+geom_point(aes(color=gender))+
+geom_smooth(method=&quot;lm&quot;,se=F,fullrange=T,aes(color=gender))+theme(legend.position=c(.9,.19)) + ggtitle(&quot;Interaction between Gender and Years of Education on Composite Score&quot;) + xlab(&quot;Education (# of Years)&quot;)</code></pre>
+<p><img src="../../project/project2_files/figure-html/unnamed-chunk-11-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>#Checking Assumptions 
+resid &lt;-fit1$residuals
+fitvalue &lt;- fit1$fitted.values
+
+#Linearity
+ggplot(CollegeDistance, aes(x=education, y=score)) + geom_point() + geom_smooth(method = &quot;lm&quot;, se=F)</code></pre>
+<p><img src="../../project/project2_files/figure-html/unnamed-chunk-12-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>#Homoskedasticity From Graph
+ggplot()+geom_point(aes(fitvalue,resid))+geom_hline(yintercept=0, color=&#39;red&#39;)</code></pre>
+<p><img src="../../project/project2_files/figure-html/unnamed-chunk-12-2.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>#Homoskedasticity Breuch-Pagan Test 
+bptest(fit1)</code></pre>
+<pre><code>## 
+##  studentized Breusch-Pagan test
+## 
+## data:  fit1
+## BP = 25.759, df = 3, p-value = 1.071e-05</code></pre>
+<pre class="r"><code>#Normality From The Graph
+ggplot()+geom_histogram(aes(resid), bins=20)</code></pre>
+<p><img src="../../project/project2_files/figure-html/unnamed-chunk-12-3.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot()+geom_qq(aes(sample=resid))+geom_qq_line()</code></pre>
+<p><img src="../../project/project2_files/figure-html/unnamed-chunk-12-4.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>#Shapiro-Wilk Test Normality 
+shapiro.test(resid)</code></pre>
+<pre><code>## 
+##  Shapiro-Wilk normality test
+## 
+## data:  resid
+## W = 0.99527, p-value = 2.789e-11</code></pre>
+<p>The numeric variable (education) seems to have somewhat of a linear relationship with score according to the graph. According to the Breusch-Pagan Test that was conducted, the null hypothesis of homoskedasticity was rejected since the p-value is significant. Also according to the Shapiro-Wilk Test, the null hypothesis of normality was also rejected, since the test was significant. With that being said, the assumptions for linearity is somewhat met, but the assumptions for homoskedasticity and the assumptions for normality were not met.</p>
+<pre class="r"><code>#Heteroskedasticity Robust Standard Errors 
+coeftest(fit1, vcov = vcovHC(fit1))</code></pre>
+<pre><code>##
+## t test of coefficients:
+##
+## Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept) 21.686681 1.194994 18.1479 &lt; 2.2e-16 ***
+## gendermale -4.334960 1.765182 -2.4558 0.014092 *
+## education 2.071477 0.085623 24.1931 &lt; 2.2e-16 ***
+## gendermale:education 0.409633 0.125425 3.2659 0.001099
+**
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1</code></pre>
+<p>Since my data did not meet the homoskedasticity assumption, we redid the regression with heteroskedasticity robust standard errors. The t-values did seem to change slightly. The results of the education variable, without interaction, became more significant. Most of the rest of the data stayed the same.</p>
+<pre class="r"><code>#Proportion of Variation Explained by Model 
+summary(fit1)</code></pre>
+<pre><code>##
+## Call:
+## lm(formula = score ~ gender * education, data =
+CollegeDistance)
+##
+## Residuals:
+## Min 1Q Median 3Q Max
+## -23.461 -5.832 -0.035 5.599 26.266
+##
+## Coefficients:
+## Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept) 21.68668 1.17604 18.440 &lt; 2e-16 ***
+## gendermale -4.33496 1.74073 -2.490 0.01280 *
+## education 2.07148 0.08457 24.494 &lt; 2e-16 ***
+## gendermale:education 0.40963 0.12499 3.277 0.00106 **
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1
+##
+## Residual standard error: 7.669 on 4735 degrees of
+freedom
+## Multiple R-squared: 0.2239, Adjusted R-squared: 0.2234
+## F-statistic: 455.3 on 3 and 4735 DF, p-value: &lt; 2.2e-16</code></pre>
+<p>When looking at the R squared indicator, the proportion of variation in score that is explained by the model is approximately 0.2239. The adjusted R squared valye of 0.2234 is not that different. This is a more conservative value that looks at the proportion of variation in score that is explained by the model.</p>
+<ul>
+<li><strong>4. (5 pts)</strong> Rerun same regression model (with the interaction), but this time compute bootstrapped standard errors (either by resampling observations or residuals). Discuss any changes you observe in SEs and p-values using these SEs compared to the original SEs and the robust SEs)</li>
+</ul>
+<pre class="r"><code>#Bootstrapped SE
+samp_dist&lt;-replicate(5000, {
+boot_dat&lt;-boot_dat&lt;-CollegeDistance_c[sample(nrow(CollegeDistance_c),replace=TRUE),]
+fit2&lt;-lm(score ~ gender * education, data=boot_dat)
+coef(fit2)
+})
+
+samp_dist%&gt;%t%&gt;%as.data.frame%&gt;%summarize_all(sd)</code></pre>
+<pre><code>##   (Intercept) gendermale  education gendermale:education
+## 1   0.1512662  0.2232947 0.08484991             0.125519</code></pre>
+<pre class="r"><code>#Bootstrapped SE (Residual Resampling)
+fit3&lt;-lm(score ~ gender * education, data=CollegeDistance_c)
+resids &lt;-fit3$residuals
+fitted &lt;- fit3$fitted.values
+
+resid_resamp&lt;-replicate(5000,{
+new_resids&lt;-sample(resids,replace=TRUE)
+CollegeDistance_c$new_y&lt;-fitted+new_resids
+fit3&lt;-lm(new_y ~ gender * education, data=CollegeDistance_c)
+coef(fit3)
+})
+
+resid_resamp%&gt;%t%&gt;%as.data.frame%&gt;%summarize_all(sd)</code></pre>
+<pre><code>##   (Intercept) gendermale  education gendermale:education
+## 1   0.1488794   0.221047 0.08407657            0.1245731</code></pre>
+<p>The model was run again with the bootstrapped standard errors since the data was initially deemed to be non-normal. The standard errors that were obtained from the bootstrapped model was lower than the standard errors that were obtained from the heteroskedastic and original standard errors. When using residual resampling, the bootstrapped standard errors had a combination of standard errors that were larger than and those that were less than the heteroskedastic and original standard errors. In order to make sure that we account for as much error as possible in our model, we will move forward with the residual resampling bootstrapped standard error.</p>
+<ul>
+<li><p><strong>5. (25 pts)</strong> Fit a logistic regression model predicting a binary variable (if you don't have one, make/get one) from at least two explanatory variables (interaction not necessary).</p>
+<ul>
+<li>Interpret coefficient estimates in context (10)</li>
+<li>Report a confusion matrix for your logistic regression (2)</li>
+<li>Compute and discuss the Accuracy, Sensitivity (TPR), Specificity (TNR), Precision (PPV), and AUC of your model (5)</li>
+<li>Using ggplot, make a density plot of the log-odds (logit) colored/grouped by your binary outcome variable (3)</li>
+<li>Generate an ROC curve (plot) and calculate AUC (either manually or with a package); interpret (5)</li>
+</ul></li>
+</ul>
+<pre class="r"><code>#Data Preparation
+CollegeDistance_c &lt;-CollegeDistance_c %&gt;%mutate(y=as.numeric(gender==&quot;female&quot;))
+
+#Logistic Regression Model
+fit4 &lt;- glm(y ~ score + education, data = CollegeDistance_c, family = binomial(link = &quot;logit&quot;))
+coeftest(fit4)</code></pre>
+<pre><code>##
+## z test of coefficients:
+##
+## Estimate Std. Error z value Pr(&gt;|z|)
+## (Intercept) 1.3375775 0.1972407 6.7814 1.190e-11 ***
+## score -0.0224202 0.0038233 -5.8641 4.516e-09 ***
+## education 0.0397083 0.0185185 2.1442 0.03201 *
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1</code></pre>
+<pre class="r"><code>exp(-0.0224202)</code></pre>
+<pre><code>## [1] 0.9778293</code></pre>
+<pre class="r"><code>exp(0.0397083)</code></pre>
+<pre><code>## [1] 1.040507</code></pre>
+<p>Controlling for education, there is a significant effect of score on the gender of the high school seniors in this sample. Every additional year of education multiplies the individuals odds of being a female student by 0.9778293. When controlling for score, there is still a significant effect of education on the gender of the high school senior in this sample.</p>
+<pre class="r"><code>#Confusion Matrix 
+CollegeDistance_c$prob &lt;- predict(fit4, type = &quot;response&quot;)
+
+table(predict=as.numeric(CollegeDistance_c$prob&gt;5), truth=CollegeDistance_c$y) %&gt;% addmargins</code></pre>
+<pre><code>##        truth
+## predict    0    1  Sum
+##     0   2139 2600 4739
+##     Sum 2139 2600 4739</code></pre>
+<pre class="r"><code>#Accuracy Calculation
+2139/4739</code></pre>
+<pre><code>## [1] 0.451361</code></pre>
+<pre class="r"><code>#Sensitivity Calculation
+0/2139</code></pre>
+<pre><code>## [1] 0</code></pre>
+<pre class="r"><code>#Specificity Calculation 
+2139/4739</code></pre>
+<pre><code>## [1] 0.451361</code></pre>
+<pre class="r"><code>#Precision Calculation
+0/4739</code></pre>
+<pre><code>## [1] 0</code></pre>
+<p>From the confusion matrix, the accuracy of the model is approximately 0.451361.This represents the number of predicted males that are actually male. The sensitivity of the model is 0, which makes sense becuase there are no predicted females. The specificity is the same as the accuracy and the precision is the same as the sensitivity since these two sets of numbers represents the same things.</p>
+<pre class="r"><code>#Density of Log-Odds Plot
+CollegeDistance_c$odds &lt;- (CollegeDistance_c$prob)/(1-CollegeDistance_c$prob)
+CollegeDistance_c$logit &lt;- log(CollegeDistance_c$odds)
+
+ggplot(CollegeDistance_c) + geom_density(aes(logit, fill=gender), alpha=0.3)</code></pre>
+<p><img src="../../project/project2_files/figure-html/unnamed-chunk-18-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>#ROC Curve and AUC Calculation 
+ROCplot &lt;- ggplot(CollegeDistance_c) +geom_roc(aes(d=y, m=prob), n.cuts = 0) + geom_segment(aes(x=0, xend=1, y=0, yend=1))
+ROCplot</code></pre>
+<p><img src="../../project/project2_files/figure-html/unnamed-chunk-18-2.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>calc_auc(ROCplot)</code></pre>
+<pre><code>##   PANEL group       AUC
+## 1     1    -1 0.5490182</code></pre>
+<p>The calculated AUC for this model is 0.5490182. This is the probability of selecting a male with a higher prediction than a female when you take both score and education into account. This AUC is not that great whcih means that both score and education are not good indicators of gender.</p>
+<ul>
+<li><p><strong>6. (25 pts)</strong> Perform a logistic regression predicting the same binary response variable from <em>ALL</em> of the rest of your variables (the more, the better!)</p>
+<ul>
+<li>Fit model, compute in-sample classification diagnostics (Accuracy, Sensitivity, Specificity, Precision, AUC), and interpret (5)</li>
+<li>Perform 10-fold (or repeated random sub-sampling) CV with the same model and report average out-of-sample classification diagnostics (Accuracy, Sensitivity, Specificity, Precision, and AUC); interpret AUC and compare with the in-sample metrics (10)</li>
+<li>Perform LASSO on the same model/variables. Choose lambda to give the simplest model whose accuracy is near that of the best (i.e., <code>lambda.1se</code>). Discuss which variables are retained. (5)</li>
+<li>Perform 10-fold CV using only the variables lasso selected: compare model's out-of-sample AUC to that of your logistic regressions above (5)</li>
+</ul></li>
+</ul>
+<pre class="r"><code>#Logistic Regression Model
+fit5 &lt;- glm(y ~ score + education + unemp + wage + distance + tuition, data = CollegeDistance_c, family = binomial(link = &quot;logit&quot;))
+coeftest(fit5)</code></pre>
+<pre><code>##
+## z test of coefficients:
+##
+## Estimate Std. Error z value Pr(&gt;|z|)
+## (Intercept) 1.4913955 0.2747096 5.4290 5.667e-08 ***
+## score -0.0215462 0.0038765 -5.5582 2.726e-08 ***
+## education 0.0378898 0.0186002 2.0371 0.04164 *
+## unemp 0.0267612 0.0117632 2.2750 0.02291 *
+## wage -0.0419932 0.0237797 -1.7659 0.07741 .
+## distance -0.0088396 0.0136149 -0.6493 0.51617
+## tuition 0.0166854 0.0931236 0.1792 0.85780
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1</code></pre>
+<pre class="r"><code>#Confusion Matrix 
+CollegeDistance_c$prob &lt;- predict(fit5, type =&quot;response&quot;)
+table(predict=as.numeric(CollegeDistance_c$prob&gt;.5),truth=CollegeDistance_c$y)%&gt;% addmargins()</code></pre>
+<pre><code>##        truth
+## predict    0    1  Sum
+##     0    412  376  788
+##     1   1727 2224 3951
+##     Sum 2139 2600 4739</code></pre>
+<pre class="r"><code>#Accuracy Calculation
+(412+2224)/4739</code></pre>
+<pre><code>## [1] 0.5562355</code></pre>
+<pre class="r"><code>#Sensitivity Calculation
+2224/2600</code></pre>
+<pre><code>## [1] 0.8553846</code></pre>
+<pre class="r"><code>#Specificity Calculation
+412/2139</code></pre>
+<pre><code>## [1] 0.1926134</code></pre>
+<pre class="r"><code>#Precision Calculation 
+2224/3951</code></pre>
+<pre><code>## [1] 0.5628955</code></pre>
+<p>The accuracy calculation of this model indicates the number of males who are actually male (0.5562355). The sensitivity calculation represents the number of predicted females (0.8553846). The specificity rate includes both genders and is 0.1926134. And finally the precision calculation represents the number of females who are actually females (0.5628955).</p>
+<pre class="r"><code>#Class Diagnostics Function
+class_diag&lt;-function(probs,truth){
+tab&lt;-table(factor(probs&gt;.5,levels=c(&quot;FALSE&quot;,&quot;TRUE&quot;)),truth)
+acc=sum(diag(tab))/sum(tab)
+sens=tab[2,2]/colSums(tab)[2]
+spec=tab[1,1]/colSums(tab)[1]
+ppv=tab[2,2]/rowSums(tab)[2]
+if(is.numeric(truth)==FALSE &amp; is.logical(truth)==FALSE) truth&lt;-as.numeric(truth)-1
+ord&lt;-order(probs, decreasing=TRUE)
+probs &lt;- probs[ord]; truth &lt;- truth[ord]
+TPR=cumsum(truth)/max(1,sum(truth))
+FPR=cumsum(!truth)/max(1,sum(!truth))
+dup&lt;-c(probs[-1]&gt;=probs[-length(probs)], FALSE)
+TPR&lt;-c(0,TPR[!dup],1); FPR&lt;-c(0,FPR[!dup],1)
+n &lt;- length(TPR)
+auc&lt;- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n]) )
+data.frame(acc,sens,spec,ppv,auc)
+}
+
+#10-Fold CV
+set.seed(1234)
+k=10
+data1&lt;-CollegeDistance_c[sample(nrow(CollegeDistance_c)),]
+folds&lt;-cut(seq(1:nrow(CollegeDistance)),breaks=k,labels=F)
+diags&lt;-NULL
+for(i in 1:k){
+train&lt;-data1[folds!=i,]
+test&lt;-data1[folds==i,]
+truth&lt;-test$y
+fit&lt;-glm(y~score + education,data=train,family=&quot;binomial&quot;)
+probs&lt;-predict(fit,newdata = test,type=&quot;response&quot;)
+diags&lt;-rbind(diags,class_diag(probs,truth))
+}
+apply(diags,2,mean)</code></pre>
+<pre><code>##       acc      sens      spec       ppv       auc 
+## 0.5534955 0.8752451 0.1650197 0.5602152 0.5479474</code></pre>
+<p>According to the 10-Fold CV results, the out of sample accuracy is 0.5534955, the specificity is 0.1650197, the sensitivity is 0.8752451 and the auc is 0.5479474. From this we can tell that the AUC value is still not good, which means that this model is not a good predictor of gender. The AUC also slightly decreased from the AUC that was calculated earlier which shows the signs of overfitting.</p>
+<pre class="r"><code>#LASSO
+
+CollegeDistance_c$gender=NULL
+CollegeDistance_c$score=NULL
+CollegeDistance_c$education=NULL
+CollegeDistance_c$unemp=NULL
+CollegeDistance_c$wage=NULL
+CollegeDistance_c$distance=NULL
+CollegeDistance_c$tuition=NULL
+
+fit6 &lt;- lm(y~., data = CollegeDistance_c, family=&quot;binomial&quot;)
+
+y&lt;-as.matrix(CollegeDistance_c$y)
+x&lt;-model.matrix(fit6)
+cv &lt;- cv.glmnet(x, y, family=&quot;binomial&quot;)
+lasso &lt;- glmnet(x, y, family=&quot;binomial&quot;, lambda = cv$lambda.1se)
+coef(lasso)</code></pre>
+<pre><code>## 14 x 1 sparse Matrix of class &quot;dgCMatrix&quot;
+##                            s0
+## (Intercept)       -1.14877689
+## (Intercept)        .         
+## X1                 .         
+## ethnicityhispanic  .         
+## ethnicityother     .         
+## fcollegeyes        .         
+## mcollegeyes        .         
+## homeyes            .         
+## urbanyes           .         
+## incomelow          0.06291515
+## regionwest         .         
+## prob               2.36919136
+## odds               .         
+## logit              .</code></pre>
+<p>Running the LASSO regression on the linear model it is seen that none of the variables are significant. Therefore there will not be any new variables that will be introduced into the dataset as the rest of the variables are just &quot;noise&quot;.</p>
+<pre class="r"><code>#Showing How to Make New Dataset (NO Variables are significant from LASSO)
+CollegeDistance_new &lt;- data.frame(CollegeDistance_c$income, CollegeDistance_c$prob, CollegeDistance_c$y)
+
+
+data1 &lt;- CollegeDistance_new[sample(nrow(CollegeDistance_new)), ]
+folds &lt;- cut(seq(1:nrow(CollegeDistance_new)), breaks = k, labels = F)
+diags &lt;- NULL
+for (i in 1:k) {
+train &lt;- data1[folds != i, ]
+test &lt;- data1[folds == i, ]
+truth &lt;- test$CollegeDistance_c.y
+fit &lt;- lm(CollegeDistance_c.y ~ ., data = train, family = &quot;binomial&quot;)
+probs &lt;- predict(fit, newdata = test, type = &quot;response&quot;)
+diags &lt;- rbind(diags, class_diag(probs, truth))
+}
+
+diags %&gt;% summarize_all(mean)</code></pre>
+<pre><code>##         acc      sens      spec       ppv       auc
+## 1 0.5574964 0.8344786 0.2222825 0.5659226 0.5600725</code></pre>
+<p>This test shows the sample accuracy as 0.5574964, the sensitivity as 0.8344786, the specificity as 0.2222825, and the AUC as 0.5600725. This still means that the model is still not a good predictor of gender. This also shows a slight increase in the overall AUC, but it was not a significant improvement. This is mainly becuase the variables that were identified from the 10-Fold CV were not significant.</p>
+<p>...</p>
+</div>
+
+            
+        <hr>         <div class="related-posts">
+                <h5>Related Posts</h5>
+                
+              </div> 
+            </div>
+          </div>
+
+   <hr>  <div class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+
+    (function() {
+      
+      
+      if (window.location.hostname == "localhost")
+        return;
+
+      var disqus_shortname = '';
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div> 
+        </div>
+      </div>
+    </div>
+
+    
+    <footer>
+  <div id="footer">
+    <div class="container">
+      <p class="text-muted">&copy; All rights reserved. Powered by <a href="https://gohugo.io/">Hugo</a> and
+      <a href="http://www.github.com/nurlansu/hugo-sustain/">sustain</a> with ♥</p>
+    </div>
+  </div>
+</footer>
+<div class="footer"></div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="../../js/docs.min.js"></script>
+<script src="../../js/main.js"></script>
+
+<script src="../../js/ie10-viewport-bug-workaround.js"></script>
+
+
+    
+  </body>
+</html>

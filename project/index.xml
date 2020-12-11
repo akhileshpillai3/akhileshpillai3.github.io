@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Projects on Akhilesh Pillai</title>
+    <link>/project/</link>
+    <description>Recent content in Projects on Akhilesh Pillai</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language><atom:link href="/project/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Project 1: Exploratory Data Analysis</title>
+      <link>/project/project1/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project1/</guid>
+      <description>Data Wrangling and Data Exploration library(dplyr) library(tidyr) library(ggplot2) library(tibble) library(readr) ### Importing data sets child_mortality_0_5_year_olds_dying_per_1000_born &amp;lt;- read_csv(&amp;quot;child_mortality_0_5_year_olds_dying_per_1000_born.csv&amp;quot;) income_per_person_gdppercapita_ppp_inflation_adjusted &amp;lt;- read_csv(&amp;quot;income_per_person_gdppercapita_ppp_inflation_adjusted.csv&amp;quot;) primary_completion_rate_total_percent_of_relevant_age_group &amp;lt;- read_csv(&amp;quot;primary_completion_rate_total_percent_of_relevant_age_group.csv&amp;quot;)  Introduction The datasets that I picked for this project is child mortality for children ages 0-5 per 1000 births, the income per person (GDP capita inflation adjsuted), and the primary completion rate for the total percent of the relevant age group. These datasets have fairly similar variables.</description>
+    </item>
+    
+    <item>
+      <title>Project 2: Modeling, Testing, and Predicting</title>
+      <link>/project/project2/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project2/</guid>
+      <description>Introduction of Dataset This dataset includes the results of a cross-sectional study, from High School and Beyond, which was conducted in 1980 and then once again followed up in 1986. This dataset includes survey results from students from approximately 1,100 high schools. This dataset consists of several variables, both categorical and numerical. The categorical variables include gender, ethnicity, fcollege, mcollege, home, urban, income and region. The numerical variables in this dataset include score, umep, wage, distance, tuition, and education.</description>
+    </item>
+    
+  </channel>
+</rss>

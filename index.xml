@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Akhilesh Pillai</title>
+    <link>/</link>
+    <description>Recent content on Akhilesh Pillai</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language>
+    <lastBuildDate>Thu, 10 Dec 2020 00:00:00 +0000</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Final Project Blog</title>
+      <link>/post/2020/12/10/final-project-blog/</link>
+      <pubDate>Thu, 10 Dec 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/post/2020/12/10/final-project-blog/</guid>
+      <description>Language Is Complicated Having grown up in 4 different countries, I have been exposed to many different languages. It can often become confusing keeping up with the different languages everywhere I go. It got me thinking, what if there was a way to combine all languages so that everyone could easily understand what everyone else is saying. I had this tought ponder in my head growing up and observing these different cultures.</description>
+    </item>
+    
+    <item>
+      <title>Test Post</title>
+      <link>/post/2020/12/10/test-post/</link>
+      <pubDate>Thu, 10 Dec 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/post/2020/12/10/test-post/</guid>
+      <description>Link to project 1
+Link to google</description>
+    </item>
+    
+    <item>
+      <title>Hello R Markdown</title>
+      <link>/post/2015/07/23/hello-r-markdown/</link>
+      <pubDate>Thu, 23 Jul 2015 21:13:14 -0500</pubDate>
+      
+      <guid>/post/2015/07/23/hello-r-markdown/</guid>
+      <description>R Markdown This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see http://rmarkdown.rstudio.com.
+You can embed an R code chunk like this:
+summary(cars) ## speed dist ## Min. : 4.0 Min. : 2.00 ## 1st Qu.:12.0 1st Qu.: 26.00 ## Median :15.0 Median : 36.00 ## Mean :15.4 Mean : 42.98 ## 3rd Qu.</description>
+    </item>
+    
+    <item>
+      <title>Project 1: Exploratory Data Analysis</title>
+      <link>/project/project1/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project1/</guid>
+      <description>Data Wrangling and Data Exploration library(dplyr) library(tidyr) library(ggplot2) library(tibble) library(readr) ### Importing data sets child_mortality_0_5_year_olds_dying_per_1000_born &amp;lt;- read_csv(&amp;quot;child_mortality_0_5_year_olds_dying_per_1000_born.csv&amp;quot;) income_per_person_gdppercapita_ppp_inflation_adjusted &amp;lt;- read_csv(&amp;quot;income_per_person_gdppercapita_ppp_inflation_adjusted.csv&amp;quot;) primary_completion_rate_total_percent_of_relevant_age_group &amp;lt;- read_csv(&amp;quot;primary_completion_rate_total_percent_of_relevant_age_group.csv&amp;quot;)  Introduction The datasets that I picked for this project is child mortality for children ages 0-5 per 1000 births, the income per person (GDP capita inflation adjsuted), and the primary completion rate for the total percent of the relevant age group. These datasets have fairly similar variables.</description>
+    </item>
+    
+    <item>
+      <title>Project 2: Modeling, Testing, and Predicting</title>
+      <link>/project/project2/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project2/</guid>
+      <description>Introduction of Dataset This dataset includes the results of a cross-sectional study, from High School and Beyond, which was conducted in 1980 and then once again followed up in 1986. This dataset includes survey results from students from approximately 1,100 high schools. This dataset consists of several variables, both categorical and numerical. The categorical variables include gender, ethnicity, fcollege, mcollege, home, urban, income and region. The numerical variables in this dataset include score, umep, wage, distance, tuition, and education.</description>
+    </item>
+    
+    <item>
+      <title>Projects</title>
+      <link>/projects/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/projects/</guid>
+      <description> Check out some of my coding projects below:
+ Wrangling &amp;amp; Exploratory Data Analysis
+ Modeling, Inference, Prediction
+  -- </description>
+    </item>
+    
+    <item>
+      <title>Resume</title>
+      <link>/resume/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/resume/</guid>
+      <description>    </description>
+    </item>
+    
+  </channel>
+</rss>

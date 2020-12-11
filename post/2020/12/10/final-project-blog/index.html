@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Akhilesh Pillai" />
+    
+    <link rel="shortcut icon" type="image/x-icon" href="../../../../../img/favicon.ico">
+    <title>Final Project Blog</title>
+    <meta name="generator" content="Hugo 0.79.0" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="../../../../../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
+    
+    <!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+    
+  </head>
+
+  <body>
+    <div id="wrap">
+      
+      <nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="../../../../../"><i class="fa fa-home"></i></a>
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div class="navbar-collapse collapse" id="navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+        <li><a href="../../../../../post/">BLOG</a></li>
+        
+        <li><a href="../../../../../projects/">PROJECTS</a></li>
+        
+        <li><a href="../../../../../resume/">RESUME</a></li>
+        
+      
+      </ul>
+    </div>
+  </div>
+</nav>
+
+      <div class="container">
+        <div class="blog-post">
+          <h3>
+            <strong><a href="../../../../../post/2020/12/10/final-project-blog/">Final Project Blog</a></strong>
+          </h3>
+        </div>
+ 
+<div class="blog-title">
+          <h4>
+         December 10, 2020 
+            &nbsp;&nbsp;
+            
+          </h4>
+        </div>
+
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="blogpost">
+              
+
+
+<div id="language-is-complicated" class="section level2">
+<h2>Language Is Complicated</h2>
+<p>Having grown up in 4 different countries, I have been exposed to many different languages. It can often become confusing keeping up with the different languages everywhere I go. It got me thinking, what if there was a way to combine all languages so that everyone could easily understand what everyone else is saying. I had this tought ponder in my head growing up and observing these different cultures. Then I started taking classes like biostatistics and computational biology and saw how coding laguage is very similar to actual language. I saw how closely correlated and related both types of code (R Code and Python) are. This concept is called Reticulate.</p>
+</div>
+<div id="what-is-reticulate" class="section level2">
+<h2>What is Reticulate?</h2>
+<p>The literal defintion of reticulate is &quot;constructed, arranged, or marked like a net or network.&quot; When this definition gets translated into the coding world, it refers to the interplay between R code and Python in R studio. When it comes to R studio, there is a specific reticulate package that can be downloaded and used to make sure that R code and Python work together. Shown below is the code line for both R and Python, which demonstrates how the reticulate package works and how these two languages interact with each other:</p>
+<pre class="r"><code>library(reticulate)
+a &lt;- &quot;R Code and Python&quot;</code></pre>
+<p>The above is coded in R code and the code below is python:</p>
+<pre class="python"><code>b= &quot;are both complicated.&quot;
+print(r.a, b)</code></pre>
+<pre><code>## R Code and Python are both complicated.</code></pre>
+<p>The result of this code, seen above, is the reticulated version of both R Code and Python together.</p>
+</div>
+<div id="python-code-example" class="section level2">
+<h2>Python Code Example</h2>
+<p>Seen below is an example of python code that was used for one of the homeworks assignments this semester.</p>
+<pre class="python"><code>import pandas as pd
+quakes=pd.read_csv(&quot;https://vincentarelbundock.github.io/Rdatasets/csv/datasets/quakes.csv&quot;,index_col=0)
+
+type(quakes)</code></pre>
+<pre><code>## &lt;class &#39;pandas.core.frame.DataFrame&#39;&gt;</code></pre>
+<pre class="python"><code>len(quakes)</code></pre>
+<pre><code>## 1000</code></pre>
+<pre class="python"><code>len(quakes.columns)</code></pre>
+<pre><code>## 5</code></pre>
+<pre class="python"><code>import numpy as np
+
+quakes[&quot;mag&quot;].describe()</code></pre>
+<pre><code>## count    1000.000000
+## mean        4.620400
+## std         0.402773
+## min         4.000000
+## 25%         4.300000
+## 50%         4.600000
+## 75%         4.900000
+## max         6.400000
+## Name: mag, dtype: float64</code></pre>
+<pre class="python"><code>quakes[&quot;depth&quot;].describe()</code></pre>
+<pre><code>## count    1000.000000
+## mean      311.371000
+## std       215.535498
+## min        40.000000
+## 25%        99.000000
+## 50%       247.000000
+## 75%       543.000000
+## max       680.000000
+## Name: depth, dtype: float64</code></pre>
+<p>As you can see from this code, finding the summary statitics on python is very similar to finding the summary statistics on R code. The results of the python code and the results of the R code are the same as they both tell us how many rows are in the dataset (1000) and how many columns/variables in the dataset (5). They also tell us that for magnitude, the minimum and maximum is 4 and 6.4, respectively. The mean and median for the magnitude are 4.6204 and 4.6, respectively. For depth, the minimum and maximum are 40 and 680, respectively. The mean and the median for the depth variable is 311.371 and 247, respectively. Both of these languages effectively communicate with each other which makes the interplay between them much easier. With that being said, even though it was quite difficult at times to deal with the new aspects of R code and Python that I have never been exposed to before, it has been a tremendouse pleasure working with them over the course of the semester.</p>
+</div>
+
+            
+        <hr>         <div class="related-posts">
+                <h5>Related Posts</h5>
+                
+              </div> 
+            </div>
+          </div>
+
+   <hr>  <div class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+
+    (function() {
+      
+      
+      if (window.location.hostname == "localhost")
+        return;
+
+      var disqus_shortname = '';
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div> 
+        </div>
+      </div>
+    </div>
+
+    
+    <footer>
+  <div id="footer">
+    <div class="container">
+      <p class="text-muted">&copy; All rights reserved. Powered by <a href="https://gohugo.io/">Hugo</a> and
+      <a href="http://www.github.com/nurlansu/hugo-sustain/">sustain</a> with ♥</p>
+    </div>
+  </div>
+</footer>
+<div class="footer"></div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="../../../../../js/docs.min.js"></script>
+<script src="../../../../../js/main.js"></script>
+
+<script src="../../../../../js/ie10-viewport-bug-workaround.js"></script>
+
+
+    
+  </body>
+</html>

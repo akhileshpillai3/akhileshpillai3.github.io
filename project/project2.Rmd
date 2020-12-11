@@ -1,0 +1,389 @@
+---
+title: 'Project 2: Modeling, Testing, and Predicting'
+author: "Akhilesh Pillai (ap47828)"
+date: ''
+output:
+  html_document:
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+hook_output = knit_hooks$get('output')
+knit_hooks$set(output = function(x, options) {
+  # this hook is used only when the linewidth option is not NULL
+  if (!is.null(n <- options$linewidth)) {
+    x = knitr:::split_lines(x)
+    # any lines wider than n should be wrapped
+    if (any(nchar(x) > n)) x = strwrap(x, width = n)
+    x = paste(x, collapse = '\n')
+  }
+  hook_output(x, options)
+})
+
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE,fig.align="center",warning=FALSE,message=FALSE,fig.width=8, fig.height=5, linewidth=60)
+options(tibble.width = 100,width = 100)
+library(tidyverse)
+```
+
+## Introduction of Dataset 
+This dataset includes the results of a cross-sectional study, from High School and Beyond, which was conducted in 1980 and then once again followed up in 1986. This dataset includes survey results from students from approximately 1,100 high schools. This dataset consists of several variables, both categorical and numerical. The categorical variables include gender, ethnicity, fcollege, mcollege, home, urban, income and region. The numerical variables in this dataset include score, umep, wage, distance, tuition, and education. When it comes to what each of these variables represent gender jsut indicates the gender. Ethnicity indicaates the ethnicity of the individual (either African American, Hispanic or other). Score indicates the base year composite score on the achievement tests givne to high school seniors in this sample. Fcollege indicates whether or not the father is a college graduate. Mcollege indicates whether or not the mother is a college graduate. Home indicates if the family owns their own home. Urban indicates is the school is in an urban area. Unemp indicates the county unemployment rate in 1980. Wage indicates the state hourly wage in manufacturing in 1980. Distance indicates the distance from 4 year colleges (in 10 miles). Tuition indicates the average state 4-year tuition (in 1000 USD). Education indicates the number of years of education. Income indicates whether or not the family's income is above $25,000. Finally, region indicates the region (West or other). I chose this dataset becuase I thought it would be interesting to look at all of the factors that affect the scores on achievement exams for this particular group of high school seniors. 
+
+## Guidelines and Rubric
+
+- **1. (15 pts)** Perform a MANOVA testing whether any of your numeric variables (or a subset of them, if including them all is unreasonable or doesn't make sense) show a mean difference across levels of one of your categorical variables (3). If they do, perform univariate ANOVAs to find response(s) showing a mean difference across groups (3), and perform post-hoc t tests to find which groups differ (3). Discuss the number of tests you have performed, calculate the probability of at least one type I error (if unadjusted), and adjust the significance level accordingly (bonferroni correction) before discussing significant differences (3). Briefly discuss MANOVA assumptions and whether or not they are likely to have been met (no need for anything too in-depth) (2).
+
+```{r}
+library(lmtest)
+library(sandwich)
+library(plotROC)
+library(tidyverse)
+library(MASS)
+library(glmnet)
+library(ggplot2)
+
+#Importing Dataset 
+CollegeDistance <- read_csv("CollegeDistance.csv")
+
+#MANOVA 
+manova <- manova(cbind(education, score, wage)~gender, data=CollegeDistance)
+summary(manova)
+```
+A manova test was conducted to determine the effect of gender on the number of years of education, base year composite test scores, and the state hourly wage in manufacturing 1980. The results of the manova test indicate that significant differences were found among each of variables at each site. 
+
+```{r}
+#Univariate ANOVA
+summary.aov(manova)
+```
+The ANOVA test for each dependent variable was conducted as a follow-up to the MANOVA test that was previously conducted. The univariate ANOVA for score was significantly different by gender. But the ones for wage and education were not significantly different by gender. 
+
+```{r}
+#Post-Hoc T-Test
+pairwise.t.test(CollegeDistance$education, CollegeDistance$gender, p.adj="none")
+
+pairwise.t.test(CollegeDistance$score, CollegeDistance$gender, p.adj="none")
+
+pairwise.t.test(CollegeDistance$wage, CollegeDistance$gender, p.adj= "none")
+```
+A post-hoc analysis was carried out by conducting pairwise comparisons to determine which gender differed in each variable that was tested. In this case, all of the p-values were greater than 0.05, except for the comparison of gender and score. This means that males significantly differ from females in the score variable but they do not significantly differ from females in the education and wage variables. 
+
+```{r}
+#Probablilty of at Least One Type-1 Error 
+1-(1-0.05)^7
+```
+Since I ran 7 different hypotheses, the probability of a Type 1 error occuring was 0.3016627.
+
+```{r}
+#Bonferroni Adjusted Correction 
+0.05/7
+```
+To Bonferroni Correction was used to keep the Type-1 error at 0.05. The adjusted signifiance level is approximately 0.007142857. 
+
+
+```{r}
+#Adjusted Post-Hoc T-tests with Bonferroni Correction
+pairwise.t.test(CollegeDistance$education, CollegeDistance$gender, p.adj="bonf")
+
+pairwise.t.test(CollegeDistance$score, CollegeDistance$gender, p.adj="bonf")
+
+pairwise.t.test(CollegeDistance$wage, CollegeDistance$gender, p.adj="bonf")
+```
+After adjusting for the significance level using the bonferroni correction, the mean difference between males and females remain the same for each of the variables as before. 
+
+This means that the assumptions for the ANOVA test (independent observations, random sample, equal variance, etc.) were all met and the assumptions for the MANOVA test were most likley not met. A primary reason for this is because the MANOVA has a lot more assumptions including homogeneity, no extreme outliers, multivariate normality, no multicollinearity, among others. This makes it nearly impossible to find a dataset that fits all of these assumptions.  
+
+- **2. (10 pts)** Perform some kind of randomization test on your data (that makes sense). The statistic can be anything you want (mean difference, correlation, F-statistic/ANOVA, chi-squared), etc. State null and alternative hypotheses, perform the test, and interpret the results (7). Create a plot visualizing the null distribution and the test statistic (3).
+
+```{r}
+#Null and ALternative Hypothesis 
+```
+Null (Ho): The mean score is the same for male vs. female high school seniors in this sample. 
+Alternative (Ha): The mean score is different for male and female high school seniors in this sample. 
+
+```{r}
+#Randomization Test (Mean Difference)
+#Test Statistic 
+mean_diff <-mean(CollegeDistance[CollegeDistance$gender=="Male",]$score)~mean(CollegeDistance[CollegeDistance$gender=="Female",]$score)
+
+#Permutation Loop
+rand_dist<-vector()
+for(i in 1:5000){
+new<-data.frame(score=sample(CollegeDistance$score),gender=CollegeDistance$gender)
+rand_dist[i]<-mean(new[new$gender=="Male",]$score)-
+mean(new[new$gender=="Female",]$score)}
+
+#Independent T-Test  
+t.test(data=CollegeDistance, score~gender)
+```
+
+The p-value for the t-test that was performed came out to be approximately 3.798e-08. Since this value is below alpha (0.05), we can reject the null hypothesis. This leads to the conclusoin that the mean score is significantly different for both male and female high school students in the sample that is represented in the dataset. 
+
+```{r}
+#Plot Visualization of Null Distribution and Test Statistic 
+
+```
+
+- **3. (35 pts)** Build a linear regression model predicting one of your response variables from at least 2 other variables, including their interaction. Mean-center any numeric variables involved in the interaction.
+
+    - Interpret the coefficient estimates (do not discuss significance) (10)
+    - Plot the regression using `ggplot()` using geom_smooth(method="lm"). If your interaction is numeric by numeric, refer to code in the slides to make the plot or check out the `interactions` package, which makes this easier. If you have 3 or more predictors, just chose two of them to plot for convenience. (8)
+    - Check assumptions of linearity, normality, and homoskedasticity either graphically or using a hypothesis test (4)
+    - Regardless, recompute regression results with robust standard errors via `coeftest(..., vcov=vcovHC(...))`. Discuss significance of results, including any changes from before/after robust SEs if applicable. (8)
+    - What proportion of the variation in the outcome does your model explain? (4)
+    
+```{r}
+#Mean-Centering Numeric Variable
+CollegeDistance_c <- CollegeDistance
+CollegeDistance_c$education <- CollegeDistance_c$education - mean(CollegeDistance_c$education, na.rm = T)
+
+#Linear Regression with Interaction 
+fit1 <-lm(score ~ gender * education, data = CollegeDistance)
+summary(fit1)
+```
+When there is no interaction between gender and education, the intercept estimate of 21.68668 is the average composite score. The coefficient estimate of -4.33496 is how much the average score decreases when the gender is male. The coefficient estimate of 2.07148 is how much the average score increases with the increase in every year of education. The coefficient of gendermale:education is how much average score will increases if the gender was male and the education increases (0.40963).  
+
+```{r}
+#Plotting Regression
+ggplot(CollegeDistance, aes(x=education, y=score, group=gender))+geom_point(aes(color=gender))+
+geom_smooth(method="lm",se=F,fullrange=T,aes(color=gender))+theme(legend.position=c(.9,.19)) + ggtitle("Interaction between Gender and Years of Education on Composite Score") + xlab("Education (# of Years)")
+```
+
+
+```{r}
+#Checking Assumptions 
+resid <-fit1$residuals
+fitvalue <- fit1$fitted.values
+
+#Linearity
+ggplot(CollegeDistance, aes(x=education, y=score)) + geom_point() + geom_smooth(method = "lm", se=F)
+
+#Homoskedasticity From Graph
+ggplot()+geom_point(aes(fitvalue,resid))+geom_hline(yintercept=0, color='red')
+
+#Homoskedasticity Breuch-Pagan Test 
+bptest(fit1)
+
+#Normality From The Graph
+ggplot()+geom_histogram(aes(resid), bins=20)
+ggplot()+geom_qq(aes(sample=resid))+geom_qq_line()
+
+#Shapiro-Wilk Test Normality 
+shapiro.test(resid)
+```
+The numeric variable (education) seems to have somewhat of a linear relationship with score according to the graph. According to the Breusch-Pagan Test that was conducted, the null hypothesis of homoskedasticity was rejected since the p-value is significant. Also according to the Shapiro-Wilk Test, the null hypothesis of normality was also rejected, since the test was significant. With that being said, the assumptions for linearity is somewhat met, but the assumptions for homoskedasticity and the assumptions for normality were not met. 
+
+```{r}
+#Heteroskedasticity Robust Standard Errors 
+coeftest(fit1, vcov = vcovHC(fit1))
+```
+
+Since my data did not meet the homoskedasticity assumption, we redid the regression with heteroskedasticity robust standard errors. The t-values did seem to change slightly. The results of the education variable, without interaction, became more significant. Most of the rest of the data stayed the same. 
+
+```{r}
+#Proportion of Variation Explained by Model 
+summary(fit1)
+```
+When looking at the R squared indicator, the proportion of variation in score that is explained by the model is approximately 0.2239. The adjusted R squared valye of 0.2234 is not that different. This is a more conservative value that looks at the proportion of variation in score that is explained by the model. 
+
+- **4. (5 pts)** Rerun same regression model (with the interaction), but this time compute bootstrapped standard errors (either by resampling observations or residuals). Discuss any changes you observe in SEs and p-values using these SEs compared to the original SEs and the robust SEs)
+
+```{r}
+#Bootstrapped SE
+samp_dist<-replicate(5000, {
+boot_dat<-boot_dat<-CollegeDistance_c[sample(nrow(CollegeDistance_c),replace=TRUE),]
+fit2<-lm(score ~ gender * education, data=boot_dat)
+coef(fit2)
+})
+
+samp_dist%>%t%>%as.data.frame%>%summarize_all(sd)
+
+#Bootstrapped SE (Residual Resampling)
+fit3<-lm(score ~ gender * education, data=CollegeDistance_c)
+resids <-fit3$residuals
+fitted <- fit3$fitted.values
+
+resid_resamp<-replicate(5000,{
+new_resids<-sample(resids,replace=TRUE)
+CollegeDistance_c$new_y<-fitted+new_resids
+fit3<-lm(new_y ~ gender * education, data=CollegeDistance_c)
+coef(fit3)
+})
+
+resid_resamp%>%t%>%as.data.frame%>%summarize_all(sd)
+```
+
+The model was run again with the bootstrapped standard errors since the data was initially deemed to be non-normal. The standard errors that were obtained from the bootstrapped model was lower than the standard errors that were obtained from the heteroskedastic and original standard errors. When using residual resampling, the bootstrapped standard errors had a combination of standard errors that were larger than and those that were less than the heteroskedastic and original standard errors. In order to make sure that we account for as much error as possible in our model, we will move forward with the residual resampling bootstrapped standard error. 
+
+- **5. (25 pts)** Fit a logistic regression model predicting a binary variable (if you don't have one, make/get one) from at least two explanatory variables (interaction not necessary). 
+
+    - Interpret coefficient estimates in context (10)
+    - Report a confusion matrix for your logistic regression (2)
+    - Compute and discuss the Accuracy, Sensitivity (TPR), Specificity (TNR), Precision (PPV), and AUC of your model (5)
+    - Using ggplot, make a density plot of the log-odds (logit) colored/grouped by your binary outcome variable (3)
+    - Generate an ROC curve (plot) and calculate AUC (either manually or with a package); interpret (5)
+    
+```{r}
+#Data Preparation
+CollegeDistance_c <-CollegeDistance_c %>%mutate(y=as.numeric(gender=="female"))
+
+#Logistic Regression Model
+fit4 <- glm(y ~ score + education, data = CollegeDistance_c, family = binomial(link = "logit"))
+coeftest(fit4)
+exp(-0.0224202)
+exp(0.0397083)
+```
+Controlling for education, there is a significant effect of score on the gender of the high school seniors in this sample. Every additional year of education multiplies the individuals odds of being a female student by 0.9778293. When controlling for score, there is still a significant effect of education on the gender of the high school senior in this sample. 
+
+```{r}
+#Confusion Matrix 
+CollegeDistance_c$prob <- predict(fit4, type = "response")
+
+table(predict=as.numeric(CollegeDistance_c$prob>5), truth=CollegeDistance_c$y) %>% addmargins
+
+#Accuracy Calculation
+2139/4739
+
+#Sensitivity Calculation
+0/2139
+
+#Specificity Calculation 
+2139/4739
+
+#Precision Calculation
+0/4739
+
+```
+From the confusion matrix, the accuracy of the model is approximately 0.451361.This represents the number of predicted males that are actually male. The sensitivity of the model is 0, which makes sense becuase there are no predicted females. The specificity is the same as the accuracy and the precision is the same as the sensitivity since these two sets of numbers represents the same things.
+
+```{r}
+#Density of Log-Odds Plot
+CollegeDistance_c$odds <- (CollegeDistance_c$prob)/(1-CollegeDistance_c$prob)
+CollegeDistance_c$logit <- log(CollegeDistance_c$odds)
+
+ggplot(CollegeDistance_c) + geom_density(aes(logit, fill=gender), alpha=0.3)
+
+#ROC Curve and AUC Calculation 
+ROCplot <- ggplot(CollegeDistance_c) +geom_roc(aes(d=y, m=prob), n.cuts = 0) + geom_segment(aes(x=0, xend=1, y=0, yend=1))
+ROCplot
+calc_auc(ROCplot)
+```
+The calculated AUC for this model is 0.5490182. This is the probability of selecting a male with a higher prediction than a female when you take both score and education into account. This AUC is not that great whcih means that both score and education are not good indicators of gender. 
+
+
+- **6. (25 pts)** Perform a logistic regression predicting the same binary response variable from *ALL* of the rest of your variables (the more, the better!) 
+
+    - Fit model, compute in-sample classification diagnostics (Accuracy, Sensitivity, Specificity, Precision, AUC), and interpret (5)
+    - Perform 10-fold (or repeated random sub-sampling) CV with the same model and report average out-of-sample classification diagnostics (Accuracy, Sensitivity, Specificity, Precision, and AUC); interpret AUC and compare with the in-sample metrics (10)
+    - Perform LASSO on the same model/variables. Choose lambda to give the simplest model whose accuracy is near that of the best (i.e., `lambda.1se`). Discuss which variables are retained. (5)
+    - Perform 10-fold CV using only the variables lasso selected: compare model's out-of-sample AUC to that of your logistic regressions above (5)
+
+```{r}
+#Logistic Regression Model
+fit5 <- glm(y ~ score + education + unemp + wage + distance + tuition, data = CollegeDistance_c, family = binomial(link = "logit"))
+coeftest(fit5)
+
+#Confusion Matrix 
+CollegeDistance_c$prob <- predict(fit5, type ="response")
+table(predict=as.numeric(CollegeDistance_c$prob>.5),truth=CollegeDistance_c$y)%>% addmargins()
+
+#Accuracy Calculation
+(412+2224)/4739
+
+#Sensitivity Calculation
+2224/2600
+
+#Specificity Calculation
+412/2139
+
+#Precision Calculation 
+2224/3951
+```
+The accuracy calculation of this model indicates the number of males who are actually male (0.5562355). The sensitivity calculation represents the number of predicted females (0.8553846). The specificity rate includes both genders and is 0.1926134. And finally the precision calculation represents the number of females who are actually females (0.5628955). 
+
+```{r}
+#Class Diagnostics Function
+class_diag<-function(probs,truth){
+tab<-table(factor(probs>.5,levels=c("FALSE","TRUE")),truth)
+acc=sum(diag(tab))/sum(tab)
+sens=tab[2,2]/colSums(tab)[2]
+spec=tab[1,1]/colSums(tab)[1]
+ppv=tab[2,2]/rowSums(tab)[2]
+if(is.numeric(truth)==FALSE & is.logical(truth)==FALSE) truth<-as.numeric(truth)-1
+ord<-order(probs, decreasing=TRUE)
+probs <- probs[ord]; truth <- truth[ord]
+TPR=cumsum(truth)/max(1,sum(truth))
+FPR=cumsum(!truth)/max(1,sum(!truth))
+dup<-c(probs[-1]>=probs[-length(probs)], FALSE)
+TPR<-c(0,TPR[!dup],1); FPR<-c(0,FPR[!dup],1)
+n <- length(TPR)
+auc<- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n]) )
+data.frame(acc,sens,spec,ppv,auc)
+}
+
+#10-Fold CV
+set.seed(1234)
+k=10
+data1<-CollegeDistance_c[sample(nrow(CollegeDistance_c)),]
+folds<-cut(seq(1:nrow(CollegeDistance)),breaks=k,labels=F)
+diags<-NULL
+for(i in 1:k){
+train<-data1[folds!=i,]
+test<-data1[folds==i,]
+truth<-test$y
+fit<-glm(y~score + education,data=train,family="binomial")
+probs<-predict(fit,newdata = test,type="response")
+diags<-rbind(diags,class_diag(probs,truth))
+}
+apply(diags,2,mean)
+```
+
+According to the 10-Fold CV results, the out of sample accuracy is 0.5534955, the specificity is 0.1650197, the sensitivity is 0.8752451 and the auc is 0.5479474. From this we can tell that the AUC value is still not good, which means that this model is not a good predictor of gender. The AUC also slightly decreased from the AUC that was calculated earlier which shows the signs of overfitting. 
+
+```{r}
+#LASSO
+
+CollegeDistance_c$gender=NULL
+CollegeDistance_c$score=NULL
+CollegeDistance_c$education=NULL
+CollegeDistance_c$unemp=NULL
+CollegeDistance_c$wage=NULL
+CollegeDistance_c$distance=NULL
+CollegeDistance_c$tuition=NULL
+
+fit6 <- lm(y~., data = CollegeDistance_c, family="binomial")
+
+y<-as.matrix(CollegeDistance_c$y)
+x<-model.matrix(fit6)
+cv <- cv.glmnet(x, y, family="binomial")
+lasso <- glmnet(x, y, family="binomial", lambda = cv$lambda.1se)
+coef(lasso)
+```
+
+Running the LASSO regression on the linear model it is seen that none of the variables are significant. Therefore there will not be any new variables that will be introduced into the dataset as the rest of the variables are just "noise". 
+
+```{r}
+#Showing How to Make New Dataset (NO Variables are significant from LASSO)
+CollegeDistance_new <- data.frame(CollegeDistance_c$income, CollegeDistance_c$prob, CollegeDistance_c$y)
+
+
+data1 <- CollegeDistance_new[sample(nrow(CollegeDistance_new)), ]
+folds <- cut(seq(1:nrow(CollegeDistance_new)), breaks = k, labels = F)
+diags <- NULL
+for (i in 1:k) {
+train <- data1[folds != i, ]
+test <- data1[folds == i, ]
+truth <- test$CollegeDistance_c.y
+fit <- lm(CollegeDistance_c.y ~ ., data = train, family = "binomial")
+probs <- predict(fit, newdata = test, type = "response")
+diags <- rbind(diags, class_diag(probs, truth))
+}
+
+diags %>% summarize_all(mean)
+
+```
+This test shows the sample accuracy as 0.5574964, the sensitivity as 0.8344786, the specificity as 0.2222825, and the AUC as 0.5600725. This still means that the model is still not a good predictor of gender. This also shows a slight increase in the overall AUC, but it was not a significant improvement. This is mainly becuase the variables that were identified from the 10-Fold CV were not significant. 
+
+...
